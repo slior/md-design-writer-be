@@ -1,0 +1,11 @@
+{
+  "name": "sys-canvas-be",
+  "version": "1.0.0",
+  "description": "An application for writing and sharing system design documents",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Lior Schejter",
+  "license": "ISC"
+}
