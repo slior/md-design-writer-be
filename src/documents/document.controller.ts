@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Param, Body, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, NotFoundException, Logger } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './document.dto';
 import { Document } from './document.interface';
@@ -10,14 +10,15 @@ const dbg = (s) => {
 @Controller('documents')
 export class DocumentController
 {
+  private readonly logger = new Logger(DocumentController.name);
   constructor(private readonly documentService: DocumentService) {}
 
   @Get()
   async findAll(): Promise<Document[]>
   {
-    let docs : Document[] = this.documentService.findAll();
-    dbg(`# of documents retrieved: ${docs.length}`)
-    return docs
+    let docs = await this.documentService.findAll();
+    this.logger.debug(`Retrieved ${docs.length} documents`)
+    return docs;
   }
 
   @Get(':id')
@@ -35,7 +36,9 @@ export class DocumentController
   @Post()
   async create(@Body() createDocumentDto: CreateDocumentDto): Promise<Document>
   {
-    return this.documentService.create(createDocumentDto);
+    let doc = this.documentService.create(createDocumentDto);
+    this.logger.debug(`Create, doc returned = ${JSON.stringify(doc)}`)
+    return doc
   }
 
   @Put(':id')
