@@ -6,6 +6,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import documentConfig from './config/document.config';
 
+
+let dbHost = process.env.DB_HOST
+let dbPort = parseInt(process.env.DB_PORT || '5432')
+let dbUser = process.env.DB_USERNAME
+let dbPassword = process.env.DB_PASSWORD
+let dbDatabase = process.env.DB_DATABASE
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -15,11 +23,11 @@ import documentConfig from './config/document.config';
     DocumentsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost', //TODO: from env
-      port: 5432, //TODO: from env
-      username: 'postgres', //TODO: from env
-      password: 'writerdb', //TODO: from env
-      database: 'byte-notes', //TODO: from env
+      host: dbHost,
+      port: dbPort, 
+      username: dbUser, 
+      password: dbPassword, 
+      database: dbDatabase, 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     })

@@ -46,7 +46,10 @@ export class PostgreSQLDocumentStore implements DocumentStore
   constructor(
     @InjectRepository(DocumentEntity)
     private documentRepository: Repository<DocumentEntity>,
-  ) {}
+  )
+  {
+    this.logger.debug(`Connecting to DB on: ${process.env.DB_HOST}:${process.env.DB_PORT} with user: ${process.env.DB_USERNAME}`)
+  }
 
   async insertDocument(document: Partial<Document>): Promise<Document>
   {
