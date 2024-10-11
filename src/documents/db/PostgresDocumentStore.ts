@@ -92,11 +92,10 @@ export class PostgreSQLDocumentStore implements DocumentStore
       throw new NotFoundException(`Document with ID ${id} not found`);
     }
     const mergedDoc = this.documentRepository.merge( existingDocument,document)
+    this.logger.debug(`Merged doc: ${JSON.stringify(mergedDoc)}`)
     return this.documentRepository
                 .save(mergedDoc)
                 .then((de : DocumentEntity) => toDocument(de))
-    // await this.documentRepository.update(id, toDocumentEntity(document));
-    // return await this.findDocumentById(id);
   }
 
   async deleteDocument(id: string): Promise<void>

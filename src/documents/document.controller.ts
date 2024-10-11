@@ -1,11 +1,9 @@
-import { Controller, Get, Post, Put, Param, Body, NotFoundException, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, NotFoundException, Logger, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './document.dto';
 import { Document } from './document.interface';
 
-const dbg = (s) => {
-  console.log(s || '')
-}
+
 
 @Controller('documents')
 export class DocumentController
@@ -22,18 +20,20 @@ export class DocumentController
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string): Promise<Document>
   {
     const document = await this.documentService.findOne(id);
     if (!document) {
-      dbg (`Failed to retrieve document ${id}`)
+      this.logger.debug(`Failed to retrieve document ${id}`)
       throw new NotFoundException(`Document with ID ${id} not found`);
     }
-    dbg(`retrieving document ${id}`)
+    this.logger.debug(`retrieving document ${id}`)
     return document;
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createDocumentDto: CreateDocumentDto): Promise<Document>
   {
     let doc = this.documentService.create(createDocumentDto);
@@ -42,16 +42,24 @@ export class DocumentController
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() updateDocumentDto: UpdateDocumentDto): Promise<Document>
   {
-    dbg(`Updating document ${id}`)
+    this.logger.debug(`Updating document ${id}`)
     const updatedDocument = await this.documentService.update(id, updateDocumentDto);
     if (!updatedDocument)
     {
-      dbg(`Failed to update ${id}`)
+      this.logger.error(`Failed to update ${id}`)
       throw new NotFoundException(`Document with ID ${id} not found`);
     }
-    dbg(`Success updating ${id}`)
+    this.logger.log(`Success updating ${id}`)
     return updatedDocument;
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id') id: string) : Promise<void>
+  {
+      return this.documentService.delete(id)
   }
 }

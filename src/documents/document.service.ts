@@ -45,18 +45,17 @@ export class DocumentService
     }
   }
 
-  update(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document | undefined> {
- 
-    
-    const updatedDocument: Partial<Document> = {
+  update(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document | undefined>
+  {
+    const documentUpdate: Partial<Document> = {
       // ...existingDocument,
       ...updateDocumentDto,
       updatedAt: new Date(),
     };
-    return this.documentStore.updateDocument(id, updatedDocument);
+    return this.documentStore.updateDocument(id, documentUpdate);
   }
 
-  delete(id: string): void {
-    this.documentStore.deleteDocument(id);
+  delete(id: string): Promise<void> {
+    return this.documentStore.deleteDocument(id);
   }
 }
