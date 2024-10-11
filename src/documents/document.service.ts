@@ -48,7 +48,6 @@ export class DocumentService
   update(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document | undefined>
   {
     const documentUpdate: Partial<Document> = {
-      // ...existingDocument,
       ...updateDocumentDto,
       updatedAt: new Date(),
     };
