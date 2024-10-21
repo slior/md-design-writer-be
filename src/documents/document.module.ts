@@ -15,7 +15,7 @@ import { Repository } from 'typeorm';
 @Module({
   imports : [
     ConfigModule.forFeature(documentConfig),
-    TypeOrmModule.forFeature([DocumentEntity])
+    TypeOrmModule.forFeature([DocumentEntity]),
   ],
   controllers: [DocumentController],
   providers:
@@ -23,10 +23,12 @@ import { Repository } from 'typeorm';
         DocumentService, 
         {
           provide: 'DocumentStore',
-          useFactory: (configService: ConfigService, docRepository : Repository<DocumentEntity>) => {
+          useFactory: (configService: ConfigService, docRepository : Repository<DocumentEntity>) =>
+          {
             const storeType = configService.get<string>('document.storeType');
             
-            switch (storeType) {
+            switch (storeType)
+            {
               case DocumentStoreType.POSTGRES:
                 return new PostgreSQLDocumentStore(docRepository);
               case DocumentStoreType.FILE_SYSTEM:
