@@ -11,6 +11,7 @@ import { DocumentEntity } from './db/document.entity';
 import { Repository } from 'typeorm';
 
 
+const DOC_CONFIG_PREFIX = 'document'
 
 @Module({
   imports : [
@@ -25,14 +26,15 @@ import { Repository } from 'typeorm';
           provide: 'DocumentStore',
           useFactory: (configService: ConfigService, docRepository : Repository<DocumentEntity>) =>
           {
-            const storeType = configService.get<string>('document.storeType');
+            const storeType = configService.get<string>(`${DOC_CONFIG_PREFIX}.storeType`);
             
             switch (storeType)
             {
               case DocumentStoreType.POSTGRES:
                 return new PostgreSQLDocumentStore(docRepository);
               case DocumentStoreType.FILE_SYSTEM:
-                return new FileSystemDocumentStore('./data');
+                let dataPath = configService.get<string>(`${DOC_CONFIG_PREFIX}.${DocumentStoreType.FILE_SYSTEM}.basePath`)
+                return new FileSystemDocumentStore(dataPath);
               default:
                 throw new Error(`Unknown document store type: ${storeType}`);
             }
