@@ -33,11 +33,12 @@ export class AuthService
   {
     const payload = { email: user.email, sub: user.id };
     this.logger.log(`Logging in user: ${payload.email}`)
-    this.logger.debug(`Expiration set to ${this.configService.get<string>('auth.jwt.expiresIn')}`)
+    const expiresIn = this.configService.get<string>('auth.jwt.expiresIn')
+    this.logger.debug(`Expiration set to ${expiresIn}`)
 
     return {
       access_token: this.jwtService.sign(payload), 
-      expires_in: this.configService.get<string>('auth.jwt.expiresIn'),
+      expires_in: expiresIn
     };
   }
 
