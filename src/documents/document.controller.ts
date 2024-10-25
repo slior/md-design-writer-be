@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Put, Param, Body, NotFoundException, Logger, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, NotFoundException, Logger, Delete, HttpCode, HttpStatus,UseGuards } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './document.dto';
 import { Document } from './document.interface';
+import { JwtAuthGuard } from '../auth/auth.guard';
 
 
 
 @Controller('documents')
+@UseGuards(JwtAuthGuard)
 export class DocumentController
 {
   private readonly logger = new Logger(DocumentController.name);

@@ -4,15 +4,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import documentConfig from './config/document.config';
 import databaseConfig from './config/database.config';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import authConfig from './config/auth.config';
 
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [documentConfig, databaseConfig],
+      load: [documentConfig, databaseConfig,authConfig],
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
+    AuthModule,
+    UsersModule,
     DocumentsModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
