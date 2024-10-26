@@ -1,8 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Document } from '../document.interface';
+import { User } from '../../users/user.entity';
 
 @Entity('Documents')
-export class DocumentEntity implements Document {
+export class DocumentEntity implements Document
+{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -12,10 +14,13 @@ export class DocumentEntity implements Document {
   @Column('text')
   content: string;
 
-  @Column()
-  author : string;
-  // @Column('jsonb', { nullable: true })
-  // metadata: any;
+  // @Column()
+  // author : string;
+  @ManyToOne(() => User)
+  author : User;
+
+  // @ManyToOne(() => User)
+  // authorID : User;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

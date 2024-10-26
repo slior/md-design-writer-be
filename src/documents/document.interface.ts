@@ -1,8 +1,11 @@
-export interface Document {
+import { User } from "../users/user.entity";
+
+export interface Document
+{
     id: string;
     title: string;
     content: string;
-    author: string;
+    author : User;
     createdAt: Date;
     updatedAt: Date;
-  }
+}

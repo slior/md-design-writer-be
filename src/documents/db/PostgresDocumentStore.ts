@@ -4,24 +4,23 @@ import { Repository } from 'typeorm';
 import { DocumentEntity } from './document.entity'
 import { Document } from '../document.interface'
 import { DocumentStore } from '../document.store';
+import { User } from '../../users/user.entity';
 
 /*
 
     While Document and DocumentEntity are pretty similar, we keep them separate, and convert between the two, 
-    so we avoid coupling the nest repository implementation from the pure application interfaces.
+    so we avoid coupling the nest repository implementation to the pure application interfaces.
  */
 
 
 function toDocumentEntity(d : Partial<Document>) : Partial<DocumentEntity>
 {
-    let ret = new DocumentEntity()
+    let ret = new DocumentEntity() //id is auto-generated in postgres store
     ret.author = d.author
     ret.content = d.content
-    // ret.id = d.id //id is auto-generated in postgres store
     ret.title = d.title
     ret.createdAt = d.createdAt
     ret.updatedAt = d.updatedAt
-    
     return ret;
 }
 
@@ -33,7 +32,7 @@ function toDocument(d : DocumentEntity | undefined) : Document
         author : d.author,
         content : d.content,
         updatedAt : d.updatedAt,
-        createdAt : d.createdAt
+        createdAt : d.createdAt,
     }
     return ret;
 }
@@ -50,6 +49,7 @@ export class PostgreSQLDocumentStore implements DocumentStore
   {
     this.logger.debug(`Connecting to DB on: ${process.env.DB_HOST}:${process.env.DB_PORT} with user: ${process.env.DB_USERNAME}`)
   }
+
 
   async insertDocument(document: Partial<Document>): Promise<Document>
   {
@@ -74,22 +74,23 @@ export class PostgreSQLDocumentStore implements DocumentStore
     }
   }
 
-  async findDocumentById(id: string): Promise<Document | null>
+  async findDocumentById(id: string,user : User): Promise<Document | null>
   {
-    let docEnt = await this.documentRepository.findOne({ where: { id } });
+    // let docEnt = await this.documentRepository.findOne({ where: { id } });
+    let docEnt = await this.documentRepository.findOne({ where: { id, author : user  } }); //search by id and author, so a user can only see his documents.
     return toDocument(docEnt)
   }
 
-  async listDocuments(): Promise<Document[]>
+  async listDocuments(user : User): Promise<Document[]>
   {
-    let ret = (await this.documentRepository.find()).map(ent => toDocument(ent))
+    let ret = (await this.documentRepository.find({where : {author : user}})).map(ent => toDocument(ent))
     this.logger.debug(`Retrieved ${ret.length} records`)
     return ret;
   }
 
-  async updateDocument(id: string, document: Partial<Document>): Promise<Document | null>
+  async updateDocument(id: string, document: Partial<Document>, user : User): Promise<Document | null>
   {
-    let existingDocument = await this.documentRepository.findOne({ where: { id} });
+    let existingDocument = await this.documentRepository.findOne({ where: { id, author : user} });
 
     if (!existingDocument) {
       throw new NotFoundException(`Document with ID ${id} not found`);

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { Document } from './document.interface';
 import { CreateDocumentDto, UpdateDocumentDto } from './document.dto';
 import { DocumentStore } from './document.store';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class DocumentService
@@ -11,18 +12,19 @@ export class DocumentService
     @Inject('DocumentStore') private readonly documentStore: DocumentStore,
   ) {}
 
-  findAll(): Promise<Document[]>
+  findAll(user : User): Promise<Document[]>
   {
     this.logger.debug('Service find all')
-    return this.documentStore.listDocuments()
+    return this.documentStore.listDocuments(user)
+
   }
 
-  findOne(id: string): Promise<Document | undefined>
+  findOne(id: string, user : User): Promise<Document | undefined>
   {
-    return this.documentStore.findDocumentById(id);
+    return this.documentStore.findDocumentById(id,user);
   }
 
-  async create(createDocumentDto: CreateDocumentDto): Promise<Document>
+  async create(createDocumentDto: CreateDocumentDto, author: User): Promise<Document>
   {
     try 
     {
@@ -33,6 +35,7 @@ export class DocumentService
         ...createDocumentDto,
         createdAt: new Date(),
         updatedAt: new Date(),
+        author : author
       };
       let ret = await this.documentStore.insertDocument(newDocument);
       this.logger.debug(`Success in persisting ${JSON.stringify(ret)}`)
@@ -45,13 +48,14 @@ export class DocumentService
     }
   }
 
-  update(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document | undefined>
+  update(id: string, updateDocumentDto: UpdateDocumentDto, user : User): Promise<Document | undefined>
   {
     const documentUpdate: Partial<Document> = {
       ...updateDocumentDto,
       updatedAt: new Date(),
+      author : user
     };
-    return this.documentStore.updateDocument(id, documentUpdate);
+    return this.documentStore.updateDocument(id, documentUpdate, user);
   }
 
   delete(id: string): Promise<void> {

@@ -4,17 +4,22 @@ import { NotFoundException } from '@nestjs/common';
 import { CreateDocumentDto, UpdateDocumentDto } from './document.dto';
 import { Document } from './document.interface';
 import { DocumentStore } from './document.store';
+import { User } from '../users/user.entity';
 
+/**
+ * Test implementation for a document store.
+ * Ignores user authorization.
+ */
 class InMemoryDocumentStore implements DocumentStore 
 {
     private documents: Document[] = [];
 
-    listDocuments(): Promise<Document[]>
+    listDocuments(user : User): Promise<Document[]>
     {
         return Promise.resolve(this.documents);
     }
 
-    findDocumentById(id: string): Promise<Document | undefined>
+    findDocumentById(id: string, user : User): Promise<Document | undefined>
     {
       return Promise.resolve(this.documents.find(doc => doc.id === id));
     }
@@ -24,8 +29,8 @@ class InMemoryDocumentStore implements DocumentStore
       this.documents.push(document);
       return Promise.resolve(document)
     }
-  
-    updateDocument(id: string, document: Partial<Document>): Promise<Document | undefined>
+
+    updateDocument(id: string, document: Partial<Document>, user : User): Promise<Document | undefined>
     {
       const index = this.documents.findIndex(doc => doc.id === id);
       if (index === -1) {
@@ -50,6 +55,7 @@ describe('DocumentService', () =>
 {
     let service: DocumentService;
     let store: DocumentStore;
+    let user : User;
 
     beforeEach(async () => {
         store = new InMemoryDocumentStore();
@@ -61,6 +67,7 @@ describe('DocumentService', () =>
         }).compile();
 
         service = module.get<DocumentService>(DocumentService);
+        user = { id: "1", email: "mickey@example.com", password : "secret", createdAt : new Date(), updatedAt : new Date()  }
     });
 
     it('should be defined', () => {
@@ -70,7 +77,7 @@ describe('DocumentService', () =>
     describe('findAll', () => 
     {
         it('should return an array of documents', async () => {
-            let docs = await service.findAll()
+            let docs = await service.findAll(user)
             expect(docs).toEqual([]);
         });
     });
@@ -78,14 +85,14 @@ describe('DocumentService', () =>
     describe('findOne', () =>
     {
         it('should return a document if found', async () => {
-            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date() , author : 'mickey'};
+            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date() , author : user};
             store.insertDocument(document)
-            let doc = await service.findOne('1')
+            let doc = await service.findOne('1',user)
             expect(doc).toEqual(document);
         });
 
         it('should return undefined if not found', async () => {
-            let ret = await service.findOne('2')
+            let ret = await service.findOne('2',user)
             expect(ret).toBeUndefined();
         });
     });
@@ -93,24 +100,24 @@ describe('DocumentService', () =>
     describe('create', () => 
     {
         it('should create and return a new document', async () => {
-            const createDocumentDto: CreateDocumentDto = { title: 'Test', content: 'Test content', author : 'mickey' };
-            const document = await service.create(createDocumentDto);
+            const createDocumentDto: CreateDocumentDto = { title: 'Test', content: 'Test content', authorID : user.id };
+            const document = await service.create(createDocumentDto,user);
             expect(document).toHaveProperty('id');
             expect(document).toHaveProperty('createdAt');
             expect(document).toHaveProperty('updatedAt');
             expect(document.title).toEqual(createDocumentDto.title);
             expect(document.content).toEqual(createDocumentDto.content);
-            expect(document.author).toEqual(createDocumentDto.author);
+            expect(document.author).toEqual(user);
         });
     });
 
     describe('update', () => 
     {
         it('should update and return the document', async () => {
-            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date(), author : 'mickey' };
+            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date(), author : user };
             store.insertDocument(document);
             const updateDocumentDto: UpdateDocumentDto = { title: 'Updated Test', content: 'Updated content' };
-            const updatedDocument = await service.update('1', updateDocumentDto);
+            const updatedDocument = await service.update('1', updateDocumentDto,user);
             expect(updatedDocument).toHaveProperty('id', '1');
             expect(updatedDocument).toHaveProperty('updatedAt');
             expect(updatedDocument.title).toEqual(updateDocumentDto.title);
@@ -119,17 +126,17 @@ describe('DocumentService', () =>
 
         it('should throw NotFoundException if document not found', () => {
             const updateDocumentDto: UpdateDocumentDto = { title: 'Updated Test', content: 'Updated content' };
-            expect(() => service.update('2', updateDocumentDto)).toThrow(NotFoundException);
+            expect(() => service.update('2', updateDocumentDto, user)).toThrow(NotFoundException);
         });
     });
 
     describe('delete', () => 
     {
         it('should delete the document', async () => {
-            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date(), author : 'mickey' };
+            const document: Document = { id: '1', title: 'Test', content: 'Test content', createdAt: new Date(), updatedAt: new Date(), author : user };
             store.insertDocument(document);
             service.delete('1');
-            let doc = await service.findOne('1')
+            let doc = await service.findOne('1',user)
             expect(doc).toBeUndefined();
         });
 

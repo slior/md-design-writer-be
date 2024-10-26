@@ -13,7 +13,7 @@ export class CreateDocumentDto
 
   @IsNotEmpty()
   @IsString()
-  author: string;
+  authorID: string;
 }
 
 export class UpdateDocumentDto 

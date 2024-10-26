@@ -1,12 +1,13 @@
 
+import { User } from '../users/user.entity';
 import { Document } from './document.interface';
 
 export interface DocumentStore 
 {
-  listDocuments(): Promise<Document[]>;
-  findDocumentById(id: string): Promise<Document | undefined>;
+  listDocuments(user : User): Promise<Document[]>;
+  findDocumentById(id: string, user : User): Promise<Document | undefined>;
   insertDocument(document: Document): Promise<Document>;
-  updateDocument(id: string, document: Partial<Document>): Promise<Document | undefined>;
+  updateDocument(id: string, document: Partial<Document>, user : User): Promise<Document | undefined>;
   deleteDocument(id: string): Promise<void>;
 }
 

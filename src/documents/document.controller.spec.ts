@@ -4,16 +4,18 @@ import { DocumentController } from './document.controller';
 import { DocumentService } from './document.service';
 import { Document } from './document.interface';
 import { NotFoundException } from '@nestjs/common';
+import { User } from '../users/user.entity';
 
 describe('DocumentController', () => {
   let controller: DocumentController;
   let service: DocumentService;
+  let user : User;
 
   // Mock document for testing
   const mockDocument: Document = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     title: 'Test Document',
-    author: 'Test Author',
+    author : new User(),
     content: 'Test Content',
     createdAt: new Date(),
     updatedAt: new Date()
@@ -41,6 +43,7 @@ describe('DocumentController', () => {
 
     controller = module.get<DocumentController>(DocumentController);
     service = module.get<DocumentService>(DocumentService);
+    user = { id: "1", email: "mickey@example.com", password : "secret", createdAt : new Date(), updatedAt : new Date()  }
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -50,29 +53,29 @@ describe('DocumentController', () => {
     it('should create a new document', async () => {
       const createDocumentDto = {
         title: 'Test Document',
-        author: 'Test Author',
+        authorID: user.id,
         content: 'Test Content'
       };
 
       mockDocumentService.create.mockResolvedValue(mockDocument);
 
-      const result = await controller.create(createDocumentDto);
+      const result = await controller.create(createDocumentDto,user);
 
       expect(result).toBe(mockDocument);
-      expect(service.create).toHaveBeenCalledWith(createDocumentDto);
+      expect(service.create).toHaveBeenCalledWith(createDocumentDto,user);
       expect(service.create).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if service fails', async () => {
       const createDocumentDto = {
         title: 'Test Document',
-        author: 'Test Author',
+        authorID: user.id,
         content: 'Test Content'
       };
 
       mockDocumentService.create.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.create(createDocumentDto))
+      await expect(controller.create(createDocumentDto,user))
         .rejects
         .toThrow('Database error');
     });
@@ -82,17 +85,17 @@ describe('DocumentController', () => {
     it('should return a document by id', async () => {
       mockDocumentService.findOne.mockResolvedValue(mockDocument);
 
-      const result = await controller.findOne(mockDocument.id);
+      const result = await controller.findOne(mockDocument.id,user);
 
       expect(result).toBe(mockDocument);
-      expect(service.findOne).toHaveBeenCalledWith(mockDocument.id);
+      expect(service.findOne).toHaveBeenCalledWith(mockDocument.id,user);
       expect(service.findOne).toHaveBeenCalledTimes(1);
     });
 
     it('should throw NotFoundException when document not found', async () => {
       mockDocumentService.findOne.mockResolvedValue(null);
 
-      await expect(controller.findOne('nonexistent-id'))
+      await expect(controller.findOne('nonexistent-id',user))
         .rejects
         .toThrow(NotFoundException);
     });
@@ -107,17 +110,17 @@ describe('DocumentController', () => {
       const updatedDocument = { ...mockDocument, ...updateDocumentDto };
       mockDocumentService.update.mockResolvedValue(updatedDocument);
 
-      const result = await controller.update(mockDocument.id, updateDocumentDto);
+      const result = await controller.update(mockDocument.id, updateDocumentDto,user);
 
       expect(result).toBe(updatedDocument);
-      expect(service.update).toHaveBeenCalledWith(mockDocument.id, updateDocumentDto);
+      expect(service.update).toHaveBeenCalledWith(mockDocument.id, updateDocumentDto, user);
       expect(service.update).toHaveBeenCalledTimes(1);
     });
 
     it('should throw NotFoundException when updating non-existent document', async () => {
       mockDocumentService.update.mockResolvedValue(null);
 
-      await expect(controller.update('nonexistent-id', { title: 'New Title' }))
+      await expect(controller.update('nonexistent-id', { title: 'New Title' }, user))
         .rejects
         .toThrow(NotFoundException);
     });
