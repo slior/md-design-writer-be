@@ -44,8 +44,7 @@ export class PostgreSQLDocumentStore implements DocumentStore
 
   constructor(
     @InjectRepository(DocumentEntity)
-    private documentRepository: Repository<DocumentEntity>,
-  )
+    private documentRepository: Repository<DocumentEntity>,)
   {
     this.logger.debug(`Connecting to DB on: ${process.env.DB_HOST}:${process.env.DB_PORT} with user: ${process.env.DB_USERNAME}`)
   }
@@ -76,21 +75,20 @@ export class PostgreSQLDocumentStore implements DocumentStore
 
   async findDocumentById(id: string,user : User): Promise<Document | null>
   {
-    // let docEnt = await this.documentRepository.findOne({ where: { id } });
-    let docEnt = await this.documentRepository.findOne({ where: { id, author : user  } }); //search by id and author, so a user can only see his documents.
+    let docEnt = await this.documentRepository.findOne({ where: { id, author : { id : user.id}  } }); //search by id and author, so a user can only see his documents.
     return toDocument(docEnt)
   }
 
   async listDocuments(user : User): Promise<Document[]>
   {
-    let ret = (await this.documentRepository.find({where : {author : user}})).map(ent => toDocument(ent))
+    let ret = (await this.documentRepository.find({where : {author : { id : user.id}}})).map(ent => toDocument(ent))
     this.logger.debug(`Retrieved ${ret.length} records`)
     return ret;
   }
 
   async updateDocument(id: string, document: Partial<Document>, user : User): Promise<Document | null>
   {
-    let existingDocument = await this.documentRepository.findOne({ where: { id, author : user} });
+    let existingDocument = await this.documentRepository.findOne({ where: { id, author : { id : user.id}} });
 
     if (!existingDocument) {
       throw new NotFoundException(`Document with ID ${id} not found`);

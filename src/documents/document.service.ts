@@ -14,7 +14,7 @@ export class DocumentService
 
   findAll(user : User): Promise<Document[]>
   {
-    this.logger.debug('Service find all')
+    this.logger.debug(`Service find all for user ${user.email}`)
     return this.documentStore.listDocuments(user)
 
   }

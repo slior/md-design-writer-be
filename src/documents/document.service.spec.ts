@@ -100,7 +100,7 @@ describe('DocumentService', () =>
     describe('create', () => 
     {
         it('should create and return a new document', async () => {
-            const createDocumentDto: CreateDocumentDto = { title: 'Test', content: 'Test content', authorID : user.id };
+            const createDocumentDto: CreateDocumentDto = { title: 'Test', content: 'Test content', author : user.id };
             const document = await service.create(createDocumentDto,user);
             expect(document).toHaveProperty('id');
             expect(document).toHaveProperty('createdAt');
