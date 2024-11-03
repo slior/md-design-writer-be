@@ -10,6 +10,17 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+/* -- from dbeaver
+CREATE TABLE public.users (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	email varchar NOT NULL,
+	"password" varchar NOT NULL,
+	createdat timestamp DEFAULT now() NOT NULL,
+	updatedat timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT users_pk PRIMARY KEY (id)
+);
+*/
 -- Add author_id column to Documents table
 ALTER TABLE "Documents" 
     ADD COLUMN author_id UUID;
