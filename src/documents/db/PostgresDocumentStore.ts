@@ -48,8 +48,7 @@ export class PostgreSQLDocumentStore implements DocumentStore
   {
     this.logger.debug(`Connecting to DB on: ${process.env.DB_HOST}:${process.env.DB_PORT} with user: ${process.env.DB_USERNAME}`)
   }
-
-
+  
   async insertDocument(document: Partial<Document>): Promise<Document>
   {
     try
@@ -76,6 +75,12 @@ export class PostgreSQLDocumentStore implements DocumentStore
   async findDocumentById(id: string,user : User): Promise<Document | null>
   {
     let docEnt = await this.documentRepository.findOne({ where: { id, author : { id : user.id}  } }); //search by id and author, so a user can only see his documents.
+    return toDocument(docEnt)
+  }
+
+  async findDocumentByIdUnauthorized(id: string): Promise<Document | null>
+  {
+    let docEnt = await this.documentRepository.findOne({ where: { id } }); //search by id
     return toDocument(docEnt)
   }
 

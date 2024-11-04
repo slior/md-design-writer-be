@@ -9,13 +9,13 @@ import { User } from '../users/user.entity';
 
 
 @Controller('documents')
-@UseGuards(JwtAuthGuard)
 export class DocumentController
 {
   private readonly logger = new Logger(DocumentController.name);
   constructor(private readonly documentService: DocumentService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(@CurrentUser() user : User): Promise<Document[]>
   {
 
@@ -26,6 +26,7 @@ export class DocumentController
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string, @CurrentUser() user : User): Promise<Document>
   {
     const document = await this.documentService.findOne(id, user);
@@ -37,8 +38,23 @@ export class DocumentController
     return document;
   }
 
+  @Get('/view/:id')
+  @HttpCode(HttpStatus.OK)
+  async findOneUnauthorized(@Param('id') id: string): Promise<Document>
+  {
+    const document = await this.documentService.findOneUnauthorized(id);
+    if (!document) {
+      this.logger.debug(`Failed to retrieve document ${id}`)
+      throw new NotFoundException(`Document with ID ${id} not found`);
+    }
+    this.logger.debug(`retrieving document ${id}`)
+    return document;
+  }
+
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createDocumentDto: CreateDocumentDto, @CurrentUser() user : User): Promise<Document>
   {
     let doc = this.documentService.create(createDocumentDto,user);
@@ -48,6 +64,7 @@ export class DocumentController
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updateDocumentDto: UpdateDocumentDto, @CurrentUser() user : User): Promise<Document>
   {
     this.logger.debug(`Updating document ${id}`)
@@ -63,6 +80,7 @@ export class DocumentController
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) : Promise<void>
   {
       return this.documentService.delete(id)

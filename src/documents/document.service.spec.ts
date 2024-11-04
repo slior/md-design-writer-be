@@ -12,6 +12,7 @@ import { User } from '../users/user.entity';
  */
 class InMemoryDocumentStore implements DocumentStore 
 {
+    
     private documents: Document[] = [];
 
     listDocuments(user : User): Promise<Document[]>
@@ -22,6 +23,11 @@ class InMemoryDocumentStore implements DocumentStore
     findDocumentById(id: string, user : User): Promise<Document | undefined>
     {
       return Promise.resolve(this.documents.find(doc => doc.id === id));
+    }
+
+    findDocumentByIdUnauthorized(id: string): Promise<Document | null>
+    {
+        return this.findDocumentById(id,null);
     }
   
     insertDocument(document: Document): Promise<Document>

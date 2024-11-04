@@ -22,6 +22,7 @@ export class FileSystemDocumentStore implements DocumentStore
       fs.mkdirSync(dataDir, { recursive: true });
     }
   }
+  
 
   listDocuments(): Promise<Document[]>
   {
@@ -41,6 +42,11 @@ export class FileSystemDocumentStore implements DocumentStore
     }
     const content = fs.readFileSync(filePath, 'utf-8');
     return Promise.resolve(JSON.parse(content) as Document);
+  }
+
+  findDocumentByIdUnauthorized(id: string): Promise<Document | null>
+  {
+    return this.findDocumentById(id);
   }
 
   insertDocument(document: Document): Promise<Document>

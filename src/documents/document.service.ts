@@ -24,6 +24,11 @@ export class DocumentService
     return this.documentStore.findDocumentById(id,user);
   }
 
+  findOneUnauthorized(id : string) : Promise<Document | undefined>
+  {
+    return this.documentStore.findDocumentByIdUnauthorized(id);
+  }
+
   async create(createDocumentDto: CreateDocumentDto, author: User): Promise<Document>
   {
     try 
